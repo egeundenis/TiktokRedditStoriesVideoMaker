@@ -1,4 +1,4 @@
-🎥 TRSVM (TikTok Reddit Story Videos Maker)
+🎥 TRSVM (TikTok Reddit Stories Video Maker)
 
 TRSVM allows you to automatically generate TikTok-ready videos from a text file.
 It takes text input, converts it to speech, synchronizes it with a background video, transcribes the audio into subtitles, and (optionally) mixes background music. The result is a vertical 1080x1920 video optimized for TikTok.
@@ -42,9 +42,10 @@ On Windows: winget install ffmpeg
 
 Clone the repository:
 
-git clone https://github.com/egeundenis/tiktokredditvideomaker.git
+git clone https://github.com/egeundenis/TiktokRedditStoriesVideoMaker.git
 cd tiktokredditvideomaker
 
+... or you know, just download the .py file and put it in a directory lol
 
 Install dependencies:
 
