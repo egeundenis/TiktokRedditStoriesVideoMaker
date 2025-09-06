@@ -43,13 +43,17 @@ On Windows: winget install ffmpeg
 Clone the repository:
 
 git clone https://github.com/egeundenis/TiktokRedditStoriesVideoMaker.git
-cd tiktokredditvideomaker
+
+cd TiktokRedditStoriesVideoMaker
 
 ... or you know, just download the .py file and put it in a directory lol
 
 Install dependencies:
 
+in terminal: 
+
 pip tkinterdnd2 whisper gTTS torch
+
 .... install ffmpeg
 
 Run the app:
