@@ -6,55 +6,54 @@ It takes text input, converts it to speech, synchronizes it with a background vi
 ✨ Features
 
 📝 Text-to-Speech (TTS) using gTTS
+
 🎙️ Audio Speed Control with FFmpeg
+
 🎬 Background Video Processing in TikTok format (1080x1920, 30fps)
+
 💬 Automatic Subtitles with OpenAI Whisper
+
 🎼 Background Music Mixing (optional)
+
 🖥️ Drag & Drop GUI built with Tkinter
+
 
 📦 Dependencies
 
-Before running the app, install the required Python packages manually:
+Before running the app, these are the required Python packages. They can be installed with pip:
 
-pip install tkinterdnd2 whisper gTTS torch
+tkinterdnd2 
+whisper 
+gTTS 
+torch
 
-⚠️ tkinter is included with most Python installations (except minimal builds).
-If missing, install via your system’s package manager.
-
-System Requirements
+System Requirements:
 
 FFmpeg (must be installed and available in your PATH)
 
-Download FFmpeg
+On Linux: sudo apt install ffmpeg
 
-On Linux:
+On macOS: brew install ffmpeg
 
-sudo apt install ffmpeg
-
-
-On macOS:
-
-brew install ffmpeg
-
-
-On Windows:
-
-winget install ffmpeg
+On Windows: winget install ffmpeg
 .
 
 🚀 Usage
 
 Clone the repository:
 
-git clone https://github.com/yourusername/trsvm.git
-cd trsvm
+git clone https://github.com/egeundenis/tiktokredditvideomaker.git
+cd tiktokredditvideomaker
 
 
-Install dependencies manually as shown above.
+Install dependencies:
+
+pip tkinterdnd2 whisper gTTS torch
+.... install ffmpeg
 
 Run the app:
 
-python app.py
+trsvm.py
 
 
 Use the GUI:
@@ -71,22 +70,19 @@ The final video will be saved as:
 
 final_tiktok.mp4
 
+Lots of other intermediate files will be created as well, if you want to use them!
+
 📝 Example Workflow
 
-Create a script.txt with your content:
+Create a script.txt with your content: Basically, go to Reddit, r/nosleep or r/horrorrules, and take some stories there. Please credit them btw...
 
-Did you know?
-Honey never spoils.
-Archaeologists found 3000-year-old honey in Egypt that was still edible!
+Add a stock video as background (background.mp4): Use https://amp4.cc/ and download some cool Minecraft parkour videos, better the quality... the better!
 
+(Optional) Add background music (music.mp3). Again, use https://amp4.cc/ and download some chilling indie music. I personally love Fallen Down.
 
-Add a stock video as background (background.mp4).
+Run TRSVM, drag the files on their places, and press Start.
 
-(Optional) Add background music (music.mp3).
-
-Run TRSVM, drag the files, and press Start.
-
-Get your ready-to-post TikTok video! 🎉
+Wait and get your ready-to-post TikTok video! 🎉
 
 ⚡ Notes
 
@@ -99,7 +95,7 @@ The app uses Whisper’s base model by default. For faster/better results, repla
 🛠 Troubleshooting
 
 Error: ffmpeg not found
-→ Make sure FFmpeg is installed and added to your PATH.
+→ Make sure FFmpeg is installed and added to your PATH!
 
 Torch not installed or GPU errors
 → Install PyTorch:
@@ -111,7 +107,7 @@ See PyTorch installation guide
 .
 
 No audio output
-→ Check your .txt file is not empty and the selected language is supported by gTTS.
+→ Check your .txt file is not empty and the selected language is supported by gTTS!
 
 📜 License
 
