@@ -5,6 +5,8 @@ import subprocess
 import whisper
 import os
 from gtts import gTTS
+import random
+import json
 
 # -------------------------------
 # Functions
@@ -21,9 +23,42 @@ def speed_up_audio(input_audio, output_audio="fast_audio.mp3", factor=1.5):
     subprocess.run(cmd, check=True)
     return output_audio
 
+
+def get_video_duration(video_path):
+    """Get duration (in seconds) of a video using ffprobe."""
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "json", video_path
+    ]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    info = json.loads(result.stdout)
+    return float(info["format"]["duration"])
+
+def get_audio_duration(audio_path):
+    """Get duration (in seconds) of an audio file using ffprobe."""
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "json", audio_path
+    ]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    info = json.loads(result.stdout)
+    return float(info["format"]["duration"])
+
 def prepare_video(video_path, audio_path, output_path="tiktok_video.mp4"):
+    # Get durations
+    video_duration = get_video_duration(video_path)
+    audio_duration = get_audio_duration(audio_path)
+
+    # Ensure we have enough video to match audio
+    max_start = max(0, video_duration - audio_duration)
+    start_time = random.uniform(0, max_start)
+
+    # FFmpeg command with -ss (seek) before -i
     cmd = [
         "ffmpeg", "-y",
+        "-ss", str(start_time),  # random start time
         "-i", video_path,
         "-i", audio_path,
         "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1",
@@ -34,6 +69,7 @@ def prepare_video(video_path, audio_path, output_path="tiktok_video.mp4"):
     ]
     subprocess.run(cmd, check=True)
     return output_path
+
 
 def transcribe_and_chunk(audio_path, ass_path="output.ass", chunk_size=3):
     model = whisper.load_model("base")
