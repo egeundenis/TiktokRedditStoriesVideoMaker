@@ -65,38 +65,67 @@ class App(TkinterDnD.Tk):
         self.adv_music_file = None
         self.adv_narration_file = None
 
-        ttk.Label(self.advanced_frame, text="📄 Drag & Drop Text File (.txt) OR Narration MP3").pack(pady=10)
-        self.adv_text_drop = tk.Text(self.advanced_frame, height=2, width=60)
-        self.adv_text_drop.pack()
+        # Create a frame for file inputs
+        file_frame = ttk.LabelFrame(self.advanced_frame, text="File Inputs")
+        file_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+
+        ttk.Label(file_frame, text="📄 Text File / Narration MP3:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        self.adv_text_drop = tk.Text(file_frame, height=1, width=40)
+        self.adv_text_drop.grid(row=0, column=1, padx=5, pady=5)
         self.adv_text_drop.drop_target_register(DND_FILES)
         self.adv_text_drop.dnd_bind("<<Drop>>", self.set_adv_text_or_audio)
 
-        ttk.Label(self.advanced_frame, text="🎬 Drag & Drop Background Video").pack(pady=10)
-        self.adv_video_drop = tk.Text(self.advanced_frame, height=2, width=60)
-        self.adv_video_drop.pack()
+        ttk.Label(file_frame, text="🎬 Background Video:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        self.adv_video_drop = tk.Text(file_frame, height=1, width=40)
+        self.adv_video_drop.grid(row=1, column=1, padx=5, pady=5)
         self.adv_video_drop.drop_target_register(DND_FILES)
         self.adv_video_drop.dnd_bind("<<Drop>>", self.set_adv_video)
 
-        ttk.Label(self.advanced_frame, text="🎼 Drag & Drop Background Music (optional)").pack(pady=10)
-        self.adv_music_drop = tk.Text(self.advanced_frame, height=2, width=60)
-        self.adv_music_drop.pack()
+        ttk.Label(file_frame, text="🎼 Background Music (optional):").grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.adv_music_drop = tk.Text(file_frame, height=1, width=40)
+        self.adv_music_drop.grid(row=2, column=1, padx=5, pady=5)
         self.adv_music_drop.drop_target_register(DND_FILES)
         self.adv_music_drop.dnd_bind("<<Drop>>", self.set_adv_music)
 
-        ttk.Label(self.advanced_frame, text="🎚 Narration Speed (default 1.5)").pack(pady=5)
+        # Create a frame for speed options
+        speed_frame = ttk.LabelFrame(self.advanced_frame, text="Speed Options")
+        speed_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+
+        ttk.Label(speed_frame, text="Narration Speed:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
         self.narration_speed = tk.DoubleVar(value=1.5)
-        tk.Entry(self.advanced_frame, textvariable=self.narration_speed).pack(pady=5)
+        tk.Entry(speed_frame, textvariable=self.narration_speed, width=10).grid(row=0, column=1, padx=5, pady=5)
 
-        ttk.Label(self.advanced_frame, text="🎚 Background Music Speed (default 1.0)").pack(pady=5)
+        ttk.Label(speed_frame, text="Music Speed:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
         self.music_speed = tk.DoubleVar(value=1.0)
-        tk.Entry(self.advanced_frame, textvariable=self.music_speed).pack(pady=5)
+        tk.Entry(speed_frame, textvariable=self.music_speed, width=10).grid(row=1, column=1, padx=5, pady=5)
 
+        # Create a frame for subtitle options
+        subtitle_frame = ttk.LabelFrame(self.advanced_frame, text="Subtitle Options")
+        subtitle_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+
+        ttk.Label(subtitle_frame, text="Frequency (words per chunk):").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        self.subtitle_frequency = tk.IntVar(value=3)
+        tk.Entry(subtitle_frame, textvariable=self.subtitle_frequency, width=10).grid(row=0, column=1, padx=5, pady=5)
+
+        ttk.Label(subtitle_frame, text="Font Name:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        self.subtitle_font = tk.StringVar(value="Impact")
+        tk.Entry(subtitle_frame, textvariable=self.subtitle_font, width=15).grid(row=1, column=1, padx=5, pady=5)
+
+        ttk.Label(subtitle_frame, text="Font Size:").grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.subtitle_font_size = tk.IntVar(value=72)
+        tk.Entry(subtitle_frame, textvariable=self.subtitle_font_size, width=10).grid(row=2, column=1, padx=5, pady=5)
+
+        ttk.Label(subtitle_frame, text="Font Color (Hex):").grid(row=3, column=0, sticky="w", padx=5, pady=5)
+        self.subtitle_color = tk.StringVar(value="#00FFFF")
+        tk.Entry(subtitle_frame, textvariable=self.subtitle_color, width=10).grid(row=3, column=1, padx=5, pady=5)
+
+        # Start button and log box
         self.adv_start_btn = ttk.Button(self.advanced_frame, text="🚀 Start Advanced", command=self.start_process_advanced)
-        self.adv_start_btn.pack(pady=20)
+        self.adv_start_btn.grid(row=3, column=0, pady=10)
 
-        ttk.Label(self.advanced_frame, text="Process Log:").pack(pady=5)
+        ttk.Label(self.advanced_frame, text="Process Log:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
         self.adv_log_box = tk.Text(self.advanced_frame, height=10, width=70, state="disabled", wrap="word")
-        self.adv_log_box.pack(pady=5)
+        self.adv_log_box.grid(row=5, column=0, padx=10, pady=5)
 
     # ---------------- Log Helper ----------------
     def log(self, message, advanced=False):
@@ -185,7 +214,14 @@ class App(TkinterDnD.Tk):
             tiktok_video = prepare_video(self.adv_video_file, fast_audio, "intermediate/tiktok_video.mp4")
 
             self.log("[4/5] Transcribing audio...", advanced=True)
-            ass_file = transcribe_and_chunk(fast_audio, "intermediate/output.ass", chunk_size=3)
+            ass_file = transcribe_and_chunk(
+                fast_audio,
+                "intermediate/output.ass",
+                chunk_size=self.subtitle_frequency.get(),
+                font=self.subtitle_font.get(),
+                font_size=self.subtitle_font_size.get(),
+                color=self.subtitle_color.get()
+            )
 
             self.log("[5/5] Adding subtitles and background music...", advanced=True)
             final = burn_subtitles(tiktok_video, ass_file, bg_music=self.adv_music_file, bg_speed=self.music_speed.get(), output_path="video/final_tiktok.mp4")

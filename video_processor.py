@@ -30,12 +30,12 @@ def prepare_video(video_path, audio_path, output_path="intermediate/tiktok_video
     subprocess.run(cmd, check=True)
     return output_path
 
-def transcribe_and_chunk(audio_path, ass_path="intermediate/output.ass", chunk_size=3):
+def transcribe_and_chunk(audio_path, ass_path="intermediate/output.ass", chunk_size=3, font="Impact", font_size=72, color="#00FFFF"):
     model = whisper.load_model("base")
     result = model.transcribe(audio_path, task="transcribe")
 
     with open(ass_path, "w", encoding="utf-8") as f:
-        f.write("""[Script Info]
+        f.write(f"""[Script Info]
 ScriptType: v4.00+
 Collisions: Normal
 PlayResX: 1080
@@ -43,7 +43,7 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Centered,Impact,72,&H00FFFF&, &H000000&, &H000000&,1,0,1,4,2,5,50,50,50,0
+Style: Centered,{font},{font_size},&H{color[1:]}&, &H000000&, &H000000&,1,0,1,4,2,5,50,50,50,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
