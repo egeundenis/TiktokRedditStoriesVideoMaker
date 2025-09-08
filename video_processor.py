@@ -1,9 +1,14 @@
+import os
 import random
 import subprocess
 import whisper
 from utils import get_video_duration, get_audio_duration, speed_up_audio
 
-def prepare_video(video_path, audio_path, output_path="tiktok_video.mp4"):
+# Ensure intermediate and video folders exist
+os.makedirs("intermediate", exist_ok=True)
+os.makedirs("video", exist_ok=True)
+
+def prepare_video(video_path, audio_path, output_path="intermediate/tiktok_video.mp4"):
     video_duration = get_video_duration(video_path)
     audio_duration = get_audio_duration(audio_path)
     max_start = max(0, video_duration - audio_duration)
@@ -25,7 +30,7 @@ def prepare_video(video_path, audio_path, output_path="tiktok_video.mp4"):
     subprocess.run(cmd, check=True)
     return output_path
 
-def transcribe_and_chunk(audio_path, ass_path="output.ass", chunk_size=3):
+def transcribe_and_chunk(audio_path, ass_path="intermediate/output.ass", chunk_size=3):
     model = whisper.load_model("base")
     result = model.transcribe(audio_path, task="transcribe")
 
@@ -68,10 +73,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 i += chunk_size
     return ass_path
 
-def burn_subtitles(video_path, ass_path, bg_music=None, bg_speed=1.0, output_path="final_tiktok.mp4"):
+def burn_subtitles(video_path, ass_path, bg_music=None, bg_speed=1.0, output_path="video/final_tiktok.mp4"):
     if bg_music:
         # Adjust background music speed
-        tmp_music = "bg_temp.mp3"
+        tmp_music = "intermediate/bg_temp.mp3"
         if bg_speed != 1.0:
             speed_up_audio(bg_music, tmp_music, factor=bg_speed)
             bg_music = tmp_music

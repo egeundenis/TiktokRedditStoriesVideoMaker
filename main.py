@@ -150,19 +150,19 @@ class App(TkinterDnD.Tk):
 
         try:
             self.log("[1/5] Converting text to speech (gTTS)...")
-            input_audio = text_to_speech(self.text_file, "input_audio.mp3")
+            input_audio = text_to_speech(self.text_file, "intermediate/input_audio.mp3")
 
             self.log("[2/5] Speeding up audio...")
-            fast_audio = speed_up_audio(input_audio, "fast_input.mp3", factor=1.5)
+            fast_audio = speed_up_audio(input_audio, "intermediate/fast_input.mp3", factor=1.5)
 
             self.log("[3/5] Preparing video (TikTok format)...")
-            tiktok_video = prepare_video(self.video_file, fast_audio, "tiktok_video.mp4")
+            tiktok_video = prepare_video(self.video_file, fast_audio, "intermediate/tiktok_video.mp4")
 
             self.log("[4/5] Transcribing audio...")
-            ass_file = transcribe_and_chunk(fast_audio, "output.ass", chunk_size=3)
+            ass_file = transcribe_and_chunk(fast_audio, "intermediate/output.ass", chunk_size=3)
 
             self.log("[5/5] Adding subtitles and background music...")
-            final = burn_subtitles(tiktok_video, ass_file, bg_music=self.bg_music_file, output_path="final_tiktok.mp4")
+            final = burn_subtitles(tiktok_video, ass_file, bg_music=self.bg_music_file, output_path="video/final_tiktok.mp4")
 
             self.log(f"✅ Process complete! Output: {os.path.abspath(final)}")
         except Exception as e:
@@ -175,24 +175,20 @@ class App(TkinterDnD.Tk):
             return
 
         try:
-            if self.adv_narration_file:
-                self.log("[1/5] Using custom narration MP3...", advanced=True)
-                input_audio = self.adv_narration_file
-            else:
-                self.log("[1/5] Converting text to speech (gTTS)...", advanced=True)
-                input_audio = text_to_speech(self.adv_text_file, "input_audio.mp3")
+            self.log("[1/5] Obtaining the narration", advanced=True)
+            input_audio = self.adv_narration_file or text_to_speech(self.adv_text_file, "intermediate/input_audio.mp3")
 
             self.log("[2/5] Adjusting narration speed...", advanced=True)
-            fast_audio = speed_up_audio(input_audio, "fast_input.mp3", factor=self.narration_speed.get())
+            fast_audio = speed_up_audio(input_audio, "intermediate/fast_input.mp3", factor=self.narration_speed.get())
 
             self.log("[3/5] Preparing video (TikTok format)...", advanced=True)
-            tiktok_video = prepare_video(self.adv_video_file, fast_audio, "tiktok_video.mp4")
+            tiktok_video = prepare_video(self.adv_video_file, fast_audio, "intermediate/tiktok_video.mp4")
 
             self.log("[4/5] Transcribing audio...", advanced=True)
-            ass_file = transcribe_and_chunk(fast_audio, "output.ass", chunk_size=3)
+            ass_file = transcribe_and_chunk(fast_audio, "intermediate/output.ass", chunk_size=3)
 
             self.log("[5/5] Adding subtitles and background music...", advanced=True)
-            final = burn_subtitles(tiktok_video, ass_file, bg_music=self.adv_music_file, bg_speed=self.music_speed.get(), output_path="final_tiktok.mp4")
+            final = burn_subtitles(tiktok_video, ass_file, bg_music=self.adv_music_file, bg_speed=self.music_speed.get(), output_path="video/final_tiktok.mp4")
 
             self.log(f"✅ Process complete! Output: {os.path.abspath(final)}", advanced=True)
         except Exception as e:
