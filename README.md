@@ -21,15 +21,18 @@ You also need FFmpeg installed and added to your system PATH:
 On Linux: sudo apt install ffmpeg
 On macOS: brew install ffmpeg
 On Windows: winget install ffmpeg
+
 How to Use:
 
-Clone the repository: git clone https://github.com/egeundenis/TiktokRedditStoriesVideoMaker.git cd TiktokRedditStoriesVideoMaker
+Clone the repository: git clone https://github.com/egeundenis/TiktokRedditStoriesVideoMaker.git 
+cd TiktokRedditStoriesVideoMaker
 
-Alternatively, download the trsvm.py file and place it in a directory.
+Alternatively, download python files and place it in a directory.
 
 Install dependencies: pip install tkinterdnd2 whisper gTTS torch
+(Also install ffmpeg)
 
-Run the app: python trsvm.py
+Run the app: python main.py
 
 Use the GUI:
 
