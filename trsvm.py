@@ -23,7 +23,6 @@ def speed_up_audio(input_audio, output_audio="fast_audio.mp3", factor=1.5):
     subprocess.run(cmd, check=True)
     return output_audio
 
-
 def get_video_duration(video_path):
     """Get duration (in seconds) of a video using ffprobe."""
     cmd = [
@@ -51,20 +50,22 @@ def prepare_video(video_path, audio_path, output_path="tiktok_video.mp4"):
     video_duration = get_video_duration(video_path)
     audio_duration = get_audio_duration(audio_path)
 
-    # Ensure we have enough video to match audio
+    # Ensure video is long enough
     max_start = max(0, video_duration - audio_duration)
-    start_time = random.uniform(0, max_start)
+    start_time = random.uniform(0, max_start) if max_start > 0 else 0
 
-    # FFmpeg command with -ss (seek) before -i
+    # Loop video if it’s too short
     cmd = [
         "ffmpeg", "-y",
-        "-ss", str(start_time),  # random start time
+        "-stream_loop", "-1",  # loop video infinitely
+        "-ss", str(start_time),
         "-i", video_path,
         "-i", audio_path,
         "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1",
         "-map", "0:v:0", "-map", "1:a:0",
         "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-r", "30",
-        "-c:a", "aac", "-b:a", "192k", "-shortest",
+        "-c:a", "aac", "-b:a", "192k",
+        "-shortest",  # stop when narration ends
         output_path
     ]
     subprocess.run(cmd, check=True)
@@ -121,15 +122,22 @@ def burn_subtitles(video_path, ass_path, bg_music=None, output_path="final_tikto
         cmd = [
             "ffmpeg", "-y",
             "-i", video_path,
-            "-i", bg_music,
+            "-stream_loop", "-1", "-i", bg_music,  # loop background music infinitely
             "-vf", f"ass={ass_path}",
             "-filter_complex", "[1:a]volume=0.25[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=3[aout]",
             "-map", "0:v", "-map", "[aout]",
             "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
+            "-shortest",  # cut when video/narration ends
             output_path
         ]
     else:
-        cmd = ["ffmpeg", "-y", "-i", video_path, "-vf", f"ass={ass_path}", "-c:v", "libx264", "-c:a", "aac", "-b:a", "128k", output_path]
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", video_path,
+            "-vf", f"ass={ass_path}",
+            "-c:v", "libx264", "-c:a", "aac", "-b:a", "128k",
+            output_path
+        ]
     subprocess.run(cmd, check=True)
     return output_path
 
