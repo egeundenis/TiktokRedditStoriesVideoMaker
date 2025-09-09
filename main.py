@@ -4,6 +4,8 @@ from tkinterdnd2 import TkinterDnD, DND_FILES
 import os
 from utils import text_to_speech, speed_up_audio
 from video_processor import prepare_video, transcribe_and_chunk, burn_subtitles
+import random
+import glob
 
 # -------------------------------
 # GUI
@@ -26,6 +28,11 @@ class App(TkinterDnD.Tk):
         self.advanced_frame = ttk.Frame(self.notebook)
         self.notebook.add(self.advanced_frame, text="Advanced Mode")
         self.build_advanced_ui()
+
+        # ---------------- Bulk Production Mode ----------------
+        self.bulk_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.bulk_frame, text="Bulk Production Mode")
+        self.build_bulk_ui()
 
     # ---------------- Simple Mode UI ----------------
     def build_simple_ui(self):
@@ -127,6 +134,37 @@ class App(TkinterDnD.Tk):
         self.adv_log_box = tk.Text(self.advanced_frame, height=10, width=70, state="disabled", wrap="word")
         self.adv_log_box.grid(row=5, column=0, padx=10, pady=5)
 
+    # ---------------- Bulk Production Mode UI ----------------
+    def build_bulk_ui(self):
+        self.script_dir = None
+        self.video_dir = None
+        self.music_dir = None
+
+        ttk.Label(self.bulk_frame, text="📂 Drag & Drop Directory of Text Files").pack(pady=10)
+        self.script_drop = tk.Text(self.bulk_frame, height=2, width=60)
+        self.script_drop.pack()
+        self.script_drop.drop_target_register(DND_FILES)
+        self.script_drop.dnd_bind("<<Drop>>", self.set_script_dir)
+
+        ttk.Label(self.bulk_frame, text="📂 Drag & Drop Directory of Background Videos").pack(pady=10)
+        self.video_dir_drop = tk.Text(self.bulk_frame, height=2, width=60)
+        self.video_dir_drop.pack()
+        self.video_dir_drop.drop_target_register(DND_FILES)
+        self.video_dir_drop.dnd_bind("<<Drop>>", self.set_video_dir)
+
+        ttk.Label(self.bulk_frame, text="📂 Drag & Drop Directory of Background Music (optional)").pack(pady=10)
+        self.music_dir_drop = tk.Text(self.bulk_frame, height=2, width=60)
+        self.music_dir_drop.pack()
+        self.music_dir_drop.drop_target_register(DND_FILES)
+        self.music_dir_drop.dnd_bind("<<Drop>>", self.set_music_dir)
+
+        self.bulk_start_btn = ttk.Button(self.bulk_frame, text="🚀 Start Bulk Production", command=self.start_bulk_process)
+        self.bulk_start_btn.pack(pady=20)
+
+        ttk.Label(self.bulk_frame, text="Process Log:").pack(pady=5)
+        self.bulk_log_box = tk.Text(self.bulk_frame, height=10, width=70, state="disabled", wrap="word")
+        self.bulk_log_box.pack(pady=5)
+
     # ---------------- Log Helper ----------------
     def log(self, message, advanced=False):
         box = self.adv_log_box if advanced else self.log_box
@@ -170,6 +208,22 @@ class App(TkinterDnD.Tk):
         self.adv_music_file = event.data.strip("{}").strip()
         self.adv_music_drop.delete("1.0", tk.END)
         self.adv_music_drop.insert(tk.END, self.adv_music_file)
+
+    # ---------------- Bulk Production File Handlers ----------------
+    def set_script_dir(self, event):
+        self.script_dir = event.data.strip("{}").strip()
+        self.script_drop.delete("1.0", tk.END)
+        self.script_drop.insert(tk.END, self.script_dir)
+
+    def set_video_dir(self, event):
+        self.video_dir = event.data.strip("{}").strip()
+        self.video_dir_drop.delete("1.0", tk.END)
+        self.video_dir_drop.insert(tk.END, self.video_dir)
+
+    def set_music_dir(self, event):
+        self.music_dir = event.data.strip("{}").strip()
+        self.music_dir_drop.delete("1.0", tk.END)
+        self.music_dir_drop.insert(tk.END, self.music_dir)
 
     # ---------------- Processes ----------------
     def start_process(self):
@@ -230,6 +284,55 @@ class App(TkinterDnD.Tk):
         except Exception as e:
             messagebox.showerror("Error", str(e))
             self.log("❌ An error occurred.", advanced=True)
+
+    # ---------------- Bulk Process ----------------
+    def start_bulk_process(self):
+        if not self.script_dir or not self.video_dir:
+            messagebox.showerror("Error", "You must select directories for scripts and videos!")
+            return
+
+        try:
+            script_files = glob.glob(os.path.join(self.script_dir, "*.txt"))
+            video_files = glob.glob(os.path.join(self.video_dir, "*"))
+            music_files = glob.glob(os.path.join(self.music_dir, "*")) if self.music_dir else []
+
+            if not script_files or not video_files:
+                messagebox.showerror("Error", "No valid files found in the selected directories!")
+                return
+
+            for idx, script_file in enumerate(script_files, start=1):
+                self.log(f"[{idx}/{len(script_files)}] Processing {os.path.basename(script_file)}...", advanced=False)
+
+                # Select random video and music
+                video_file = random.choice(video_files)
+                music_file = random.choice(music_files) if music_files else None
+
+                self.log("Converting text to speech...", advanced=False)
+                input_audio = text_to_speech(script_file, f"intermediate/input_audio_{idx}.mp3")
+
+                self.log("Speeding up audio...", advanced=False)
+                fast_audio = speed_up_audio(input_audio, f"intermediate/fast_input_{idx}.mp3", factor=1.5)
+
+                self.log("Preparing video...", advanced=False)
+                tiktok_video = prepare_video(video_file, fast_audio, f"intermediate/tiktok_video_{idx}.mp4")
+
+                self.log("Transcribing audio...", advanced=False)
+                ass_file = transcribe_and_chunk(fast_audio, f"intermediate/output_{idx}.ass", chunk_size=3)
+
+                self.log("Adding subtitles and background music...", advanced=False)
+                final = burn_subtitles(
+                    tiktok_video,
+                    ass_file,
+                    bg_music=music_file,
+                    output_path=f"video/final_tiktok{idx}.mp4"
+                )
+
+                self.log(f"✅ Created: {os.path.abspath(final)}", advanced=False)
+
+            self.log("🎉 Bulk production complete!", advanced=False)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            self.log("❌ An error occurred during bulk processing.", advanced=False)
 
 if __name__ == "__main__":
     app = App()
