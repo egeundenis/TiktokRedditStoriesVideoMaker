@@ -7,7 +7,8 @@ A comprehensive Python application for creating TikTok-ready videos from text sc
 ### Core Functionality
 - **Text-to-Speech**: Converts text files to natural speech using Google Text-to-Speech (gTTS)
 - **Content Censorship**: Automatically replaces potentially flagged words with platform-friendly alternatives
-- **Video Processing**: Formats videos to TikTok specifications (1080x1920, 30fps)
+- **Video Processing**: Formats videos to TikTok specifications (1080x1920, 30fps) or preserves original format for YouTube
+- **YouTube Mode**: Automatically preserves original video format for videos longer than 3 minutes
 - **Subtitle Generation**: Creates synchronized subtitles using OpenAI Whisper transcription
 - **Audio Processing**: Speed adjustment and background music mixing
 - **Drag & Drop Interface**: User-friendly GUI built with Tkinter
@@ -19,6 +20,7 @@ Basic video creation with minimal configuration:
 - Text file input
 - Background video
 - Optional background music
+- YouTube Mode toggle for longer videos
 - One-click processing
 
 #### 2. Advanced Mode
@@ -27,11 +29,13 @@ Full control over video parameters:
 - Background music speed control
 - Subtitle customization (frequency, font, size, color)
 - Support for pre-recorded MP3 narration
+- YouTube Mode toggle for longer videos
 
 #### 3. Bulk Production Mode
 Automated batch processing:
 - Process multiple text files simultaneously
 - Random video and music selection
+- YouTube Mode toggle for longer videos
 - Comprehensive logging system
 - Performance metrics tracking
 
@@ -91,6 +95,19 @@ The application automatically censors potentially problematic words to improve p
 
 ## Advanced Configuration
 
+### YouTube Mode
+YouTube Mode is automatically enabled when:
+- The YouTube Mode checkbox is selected in any mode
+- The processed audio (after speed adjustment) is longer than 3 minutes
+
+When YouTube Mode is active:
+- Original video dimensions and aspect ratio are preserved
+- Frame rate remains unchanged from source video
+- Subtitles are positioned appropriately for horizontal formats
+- Output filename includes "youtube" for easy identification
+
+This ensures videos longer than 3 minutes maintain their original format for better YouTube compatibility, while shorter videos can still be optimized for TikTok's vertical format.
+
 ### Subtitle Customization
 - **Frequency**: Words per subtitle chunk (1-10)
 - **Font**: Any system font (default: Impact)
@@ -132,7 +149,8 @@ For processing multiple videos:
 - **Narration**: MP3 files for pre-recorded audio
 
 ### Output Format
-- **Video**: MP4 (H.264, 1080x1920, 30fps)
+- **TikTok Mode**: MP4 (H.264, 1080x1920, 30fps)
+- **YouTube Mode**: MP4 (H.264, preserves original dimensions and framerate)
 - **Audio**: AAC, 192kbps (128kbps without background music)
 
 ## Troubleshooting

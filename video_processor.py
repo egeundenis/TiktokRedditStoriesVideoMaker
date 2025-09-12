@@ -8,42 +8,68 @@ from utils import get_video_duration, get_audio_duration, speed_up_audio
 os.makedirs("intermediate", exist_ok=True)
 os.makedirs("video", exist_ok=True)
 
-def prepare_video(video_path, audio_path, output_path="intermediate/tiktok_video.mp4"):
+def prepare_video(video_path, audio_path, output_path="intermediate/tiktok_video.mp4", youtube_mode=False):
     video_duration = get_video_duration(video_path)
     audio_duration = get_audio_duration(audio_path)
     max_start = max(0, video_duration - audio_duration)
     start_time = random.uniform(0, max_start) if max_start > 0 else 0
 
-    cmd = [
-        "ffmpeg", "-y",
-        "-stream_loop", "-1",
-        "-ss", str(start_time),
-        "-i", video_path,
-        "-i", audio_path,
-        "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1",
-        "-map", "0:v:0", "-map", "1:a:0",
-        "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-r", "30",
-        "-c:a", "aac", "-b:a", "192k",
-        "-shortest",
-        output_path
-    ]
+    if youtube_mode:
+        # YouTube mode: preserve original video format and dimensions
+        cmd = [
+            "ffmpeg", "-y",
+            "-stream_loop", "-1",
+            "-ss", str(start_time),
+            "-i", video_path,
+            "-i", audio_path,
+            "-map", "0:v:0", "-map", "1:a:0",
+            "-c:v", "libx264", "-preset", "slow", "-crf", "20",
+            "-c:a", "aac", "-b:a", "192k",
+            "-shortest",
+            output_path
+        ]
+    else:
+        # TikTok mode: convert to vertical format
+        cmd = [
+            "ffmpeg", "-y",
+            "-stream_loop", "-1",
+            "-ss", str(start_time),
+            "-i", video_path,
+            "-i", audio_path,
+            "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1",
+            "-map", "0:v:0", "-map", "1:a:0",
+            "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-r", "30",
+            "-c:a", "aac", "-b:a", "192k",
+            "-shortest",
+            output_path
+        ]
     subprocess.run(cmd, check=True)
     return output_path
 
-def transcribe_and_chunk(audio_path, ass_path="intermediate/output.ass", chunk_size=3, font="Impact", font_size=72, color="#00FFFF"):
+def transcribe_and_chunk(audio_path, ass_path="intermediate/output.ass", chunk_size=3, font="Impact", font_size=72, color="#00FFFF", youtube_mode=False):
     model = whisper.load_model("base")
     result = model.transcribe(audio_path, task="transcribe")
+
+    # Set resolution and margins based on mode
+    if youtube_mode:
+        # YouTube mode: use standard 16:9 resolution
+        play_res_x, play_res_y = 1920, 1080
+        margin_v = 50  # Bottom margin for YouTube format
+    else:
+        # TikTok mode: use vertical resolution
+        play_res_x, play_res_y = 1080, 1920
+        margin_v = 50  # Bottom margin for TikTok format
 
     with open(ass_path, "w", encoding="utf-8") as f:
         f.write(f"""[Script Info]
 ScriptType: v4.00+
 Collisions: Normal
-PlayResX: 1080
-PlayResY: 1920
+PlayResX: {play_res_x}
+PlayResY: {play_res_y}
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Centered,{font},{font_size},&H{color[1:]}&, &H000000&, &H000000&,1,0,1,4,2,5,50,50,50,0
+Style: Centered,{font},{font_size},&H{color[1:]}&, &H000000&, &H000000&,1,0,1,4,2,5,50,50,{margin_v},0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
